@@ -1,0 +1,484 @@
+﻿<Window x:Class="Курсовой.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        xmlns:local="clr-namespace:Курсовой"
+        mc:Ignorable="d"
+        Title="Поле чудес" Height="700" Width="1000" Foreground="{x:Null}" Initialized="Window_Initialized" AllowDrop="True" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="20" />
+                </Grid.ColumnDefinitions>
+                <Border
+                     x:Name="Border" 
+                     Grid.ColumnSpan="2"
+                     CornerRadius="0"
+                     Background="#5472090E"
+                     BorderBrush="#FF850000"
+                     BorderThickness="1" />
+                <Border 
+                     Grid.Column="0"
+                     CornerRadius="0" 
+                     Margin="1" 
+                     Background="{x:Null}" 
+                     BorderBrush="{x:Null}"
+                     BorderThickness="0,0,1,0" />
+                <Path 
+                     x:Name="Arrow"
+                     Grid.Column="1"     
+                     Fill="#B2FFFFFF"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z" Margin="4,18,4.333,18" Stretch="Fill" Width="11.667"
+                   />
+            </Grid>
+            <!--<ControlTemplate.Triggers>
+               <Trigger Property="ToggleButton.IsMouseOver" Value="true">
+                   <Setter TargetName="Border" Property="Background" Value="#808080" />
+               </Trigger>
+               <Trigger Property="ToggleButton.IsChecked" Value="true">
+                   <Setter TargetName="Border" Property="Background" Value="#E0E0E0" />
+               </Trigger>
+               <Trigger Property="IsEnabled" Value="False">
+                   <Setter TargetName="Border" Property="Background" Value="#EEEEEE" />
+                   <Setter TargetName="Border" Property="BorderBrush" Value="#AAAAAA" />
+                   <Setter Property="Foreground" Value="#888888"/>
+                   <Setter TargetName="Arrow" Property="Fill" Value="#888888" />
+               </Trigger>
+           </ControlTemplate.Triggers>-->
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="ComboBoxTextBox" TargetType="{x:Type TextBox}">
+            <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+        </ControlTemplate>
+
+        <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="MinHeight" Value="20"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton 
+                               Name="ToggleButton" 
+                               Template="{StaticResource ComboBoxToggleButton}" 
+                               Grid.Column="2" 
+                               Focusable="false"
+                               IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                               ClickMode="Press">
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}"
+                               ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                               ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                               Margin="3,3,23,3"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left" />
+                            <TextBox x:Name="PART_EditableTextBox"
+                               Style="{x:Null}" 
+                               Template="{StaticResource ComboBoxTextBox}" 
+                               HorizontalAlignment="Left" 
+                               VerticalAlignment="Center" 
+                               Margin="3,3,23,3"
+                               Focusable="True" 
+                               Background="#FF3F3F3F"
+                               Foreground="Green"
+                               Visibility="Hidden"
+                               IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup 
+                               Name="Popup"
+                               Placement="Bottom"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True" 
+                               Focusable="False"
+                               PopupAnimation="Slide">
+
+                                <Grid Name="DropDown"
+                                 SnapsToDevicePixels="True"                
+                                 MinWidth="{TemplateBinding ActualWidth}"
+                                 MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border 
+                                   x:Name="DropDownBorder"
+                                   Background="#3F8B0505"
+
+                                   BorderThickness="1"
+                                   BorderBrush="Red"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#54888888"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="true">
+                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Margin" Value="0,2,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEditable"  Value="true">
+                                <Setter Property="IsTabStop" Value="false"/>
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+
+        <!-- SimpleStyles: ComboBoxItem -->
+        <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                        <Border Name="Border"
+                                 Padding="2"
+                                 SnapsToDevicePixels="true">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#54611E1E"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#54611E1E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <Style x:Key="sty_txtDesc15" TargetType="TextBox">
+            <Setter Property="MaxLength" Value="15" />
+        </Style>
+        <Style x:Key="sty_txtDesc50" TargetType="TextBox">
+            <Setter Property="MaxLength" Value="50" />
+        </Style>
+
+        <Storyboard x:Key="weel">
+            <DoubleAnimation Storyboard.TargetName="AnimatedRotateTransform" Storyboard.TargetProperty="Angle"  To="900" Duration="0:0:25" RepeatBehavior="Forever" />
+        </Storyboard>
+        <SolidColorBrush x:Key="color1" Color="#FFD41C24"/>
+        <RadialGradientBrush x:Key="Brushredround">
+            <GradientStop Color="#89740703"/>
+            <GradientStop Color="#001B0530" Offset="1"/>
+        </RadialGradientBrush>
+    </Window.Resources>
+    <Window.Background>
+        <ImageBrush ImageSource="fon1.png"/>
+    </Window.Background>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="label" Content="Выберите режим" Margin="323,400,251,0" VerticalAlignment="Top" Height="82" FontSize="44" FontFamily="GENISO" Foreground="#FFCB2930" FontStyle="Italic" FontWeight="Bold"/>
+        <Button x:Name="button" Content="Игрок" HorizontalAlignment="Left" Margin="203,509,0,0" VerticalAlignment="Top" Width="200" Click="button_Click" Height="50" FontSize="22" FontFamily="GENISO" FontWeight="Bold" Foreground="{DynamicResource color1}" Background="{DynamicResource buttonstyle2}" BorderBrush="#7F3C0000" RenderTransformOrigin="0.5,0.5" Style="{DynamicResource ButtonStyle1}">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="-11"/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Button.RenderTransform>
+        </Button>
+        <Button x:Name="button1" Content="Администратор" Margin="634,509,158,0" VerticalAlignment="Top" Height="50" FontSize="24" Background="{DynamicResource buttonstyle2}" Foreground="{DynamicResource color1}" FontFamily="GENISO" FontWeight="Bold" BorderBrush="#7F3C0000" RenderTransformOrigin="0.5,0.5" Click="button1_Click" FocusVisualStyle="{DynamicResource focusButtom}" Style="{DynamicResource ButtonStyle1}">
+            <Button.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="-11"/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Button.RenderTransform>
+        </Button>
+        <TabControl x:Name="tabControl" Margin="-7,-30,0,0" HorizontalAlignment="Left" Width="1001" Height="701">
+            <TabControl.Background>
+                <ImageBrush/>
+            </TabControl.Background>
+            <TabItem Header="player">
+                <Grid Margin="0,-4,-372,2" HorizontalAlignment="Left" Width="998">
+                    <Grid.Background>
+                        <ImageBrush ImageSource="userfon1.png"/>
+                    </Grid.Background>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="button4_Copy" Content="&#xA;" HorizontalAlignment="Left" Margin="79,559,0,0" VerticalAlignment="Top" Width="77" Height="47" Click="button4_Click" Style="{DynamicResource ButtonBack}" BorderBrush="#00707070">
+                        <Button.Background>
+                            <ImageBrush ImageSource="backbutton.png" Opacity="0.55" Stretch="None"/>
+                        </Button.Background>
+                    </Button>
+                    <Button x:Name="button6" Content="Начать" Margin="383,498,381,0" VerticalAlignment="Top" Height="78" Click="button6_Click" Style="{DynamicResource ButtonBack}" Foreground="{DynamicResource Yellow}" BorderBrush="{x:Null}" Background="{x:Null}" FontSize="55" Effect="{DynamicResource EffectShadow}"/>
+                    <ComboBox x:Name="comboBox" Margin="309,233,306,0" VerticalAlignment="Top" Height="42" FontSize="22" FontWeight="Bold" Background="#FF00FF3A" BorderBrush="Red" Foreground="#FFFFC500" Style="{DynamicResource {x:Type ComboBox}}" ItemContainerStyle="{DynamicResource {x:Type ComboBoxItem}}" />
+                    <Label x:Name="label3" Content="Выберите категорию:" Margin="309,124,306,0" VerticalAlignment="Top" Height="56" Foreground="{DynamicResource Yellow}" FontSize="36"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="admin" IsHitTestVisible="False">
+                <Grid AllowDrop="False" HorizontalAlignment="Left" Width="1000" Height="678" VerticalAlignment="Top" Margin="0,0,-4,-4">
+                    <Grid.Background>
+                        <ImageBrush ImageSource="fonadm.png"/>
+                    </Grid.Background>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="15*"/>
+                        <ColumnDefinition Width="262*"/>
+                        <ColumnDefinition Width="717*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <DataGrid x:Name="dataGrid"  ItemsSource="{Binding dataTable}" CanUserSortColumns="True"  AutoGenerateColumns="True"  AllowDrop="True" IsEnabled="True" IsReadOnly="False" CanUserResizeColumns="True" CanUserResizeRows="True" Height="611" Margin="10,10,10,0" VerticalAlignment="Top" RowHeight="35" Style="{DynamicResource DataGridStyle2}" UseLayoutRounding="True" AutoGeneratedColumns="dataGrid_AutoGeneratedColumns" RenderTransformOrigin="0.518,0.504" Grid.ColumnSpan="3"  Background="#7F474747" >
+                        <DataTemplate>
+
+                        </DataTemplate>
+                        <DataGrid.Resources>
+
+
+
+                            <Style x:Key="cellStyle">
+                                <Setter Property="Control.Background" Value="#58141419"/>
+                                <Setter Property="Control.Foreground" Value="#FFDCFF00"/>
+                                <Setter Property="Control.BorderBrush" Value="#A5000000"/>
+                            </Style>
+
+
+
+
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="MediumAquamarine"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="MediumAquamarine"/>
+                        </DataGrid.Resources>
+                    </DataGrid>
+                    <Button x:Name="button2" Content="Обновить" HorizontalAlignment="Left" Margin="600,626,0,0" VerticalAlignment="Top" Width="100" Height="36" Click="button2_Click" Grid.Column="2" Background="#7FFF7070" Style="{DynamicResource ButtonStyle1}"/>
+                    <Button x:Name="button3" Content="Отменить" HorizontalAlignment="Left" Margin="493,627,0,0" VerticalAlignment="Top" Width="100" Height="34" Click="button3_Click" Grid.Column="2" Background="#7FFF7070" Style="{DynamicResource ButtonStyle1}"/>
+                    <Button x:Name="button4" Content="&#xD;&#xA;" HorizontalAlignment="Left" Margin="10,621,0,0" VerticalAlignment="Top" Width="77" Height="47" Click="button4_Click" Grid.ColumnSpan="2" Style="{DynamicResource ButtonBack}" BorderBrush="#00707070">
+                        <Button.Background>
+                            <ImageBrush ImageSource="backbutton.png" Opacity="0.55" Stretch="None"/>
+                        </Button.Background>
+                    </Button>
+                    <Button x:Name="button5" Content="Удалить" Grid.Column="2" HorizontalAlignment="Left" Margin="388,627,0,0" VerticalAlignment="Top" Width="100" Height="35" Click="button5_Click" Style="{DynamicResource ButtonStyle1}" Background="#7FFF7070"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Game" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">
+                <Grid>
+                    <Grid.Background>
+                        <ImageBrush ImageSource="gamefon.png"/>
+                    </Grid.Background>
+                    <Image x:Name="img" gif:ImageBehavior.AnimatedSource="d.gif" gif:ImageBehavior.RepeatBehavior="Forever"  Margin="73,73,634,511" RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" Opacity="0.33" >
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform AngleY="-0.015"/>
+                                <RotateTransform Angle="4.217"/>
+                                <TranslateTransform X="0.003" Y="-0.038"/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
+                    <Image x:Name="img_Copy" gif:ImageBehavior.AnimatedSource="d.gif" gif:ImageBehavior.RepeatBehavior="Forever"  Margin="-54,58,761,526" RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" Opacity="0.33" >
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform/>
+                                <SkewTransform AngleY="-0.015"/>
+                                <RotateTransform Angle="3.587"/>
+                                <TranslateTransform X="0.003" Y="-0.038"/>
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
+                    <Grid x:Name="gridGame" Height="161" Margin="153,199,151,313" Background="#000B0D23" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" Width="691" VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="158*"/>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="0*"/>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="3*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="60*"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                    <Button x:Name="button7" Content="" HorizontalAlignment="Left" Margin="10,608,0,0" VerticalAlignment="Top" Width="92" Height="55" BorderBrush="{x:Null}" Style="{DynamicResource ButtonBack}" Click="button7_Click" Panel.ZIndex="2">
+                        <Button.Background>
+                            <ImageBrush ImageSource="backbutton.png" Opacity="0.55"/>
+                        </Button.Background>
+                    </Button>
+                    <Image x:Name="image_stand" HorizontalAlignment="Left" Height="455" Margin="686,225,-192,-7" VerticalAlignment="Top" Width="501" Source="yakubstand.png"/>
+                    <Image x:Name="image1" HorizontalAlignment="Left" Height="196" Margin="164,477,0,0" VerticalAlignment="Top" Width="723" Source="borderQuestAlt.png" Opacity="0.56"/>
+
+                    <Image RenderTransformOrigin="0.5,0.5" x:Name="image2" HorizontalAlignment="Left" Height="472" VerticalAlignment="Top"  Width="482" Source="coleso.png" Margin="-258,131,0,0" Opacity="0.77">
+                        <Image.RenderTransform>
+                            <RotateTransform x:Name="AnimatedRotateTransform" Angle="0" />
+                        </Image.RenderTransform>
+                        <Image.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <EventTrigger.Actions>
+                                    <BeginStoryboard Storyboard="{StaticResource weel}">
+
+                                    </BeginStoryboard>
+                                </EventTrigger.Actions>
+                            </EventTrigger>
+                        </Image.Triggers>
+                    </Image>
+                    <Label x:Name="label5" Content="Ваши текущие очки:" HorizontalAlignment="Left" Margin="619,10,0,0" VerticalAlignment="Top" Height="52" Width="237" FontSize="24" Style="{DynamicResource wordLabel}" FontWeight="Normal">
+                        <Label.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#1C740703" Offset="0.013"/>
+                                <GradientStop Color="#001B0530" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Label.Background>
+                    </Label>
+                    <Label x:Name="labelScore" Content="" HorizontalAlignment="Left" Margin="861,10,0,0" VerticalAlignment="Top" Height="52" Width="43" FontSize="24" Style="{DynamicResource wordLabel}" FontWeight="Normal">
+                        <Label.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#89740703"/>
+                                <GradientStop Color="#001B0530" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Label.Background>
+                    </Label>
+                    <Button x:Name="button9" Content="Ввести букву" HorizontalAlignment="Left" Margin="198,436,0,0" VerticalAlignment="Top" Width="230" Height="51" Foreground="#FFFFC500" BorderBrush="#02707070" FontWeight="Bold" FontSize="26" Click="button9_Click" Style="{DynamicResource ButtonBack}" Panel.ZIndex="1">
+                        <Button.Effect>
+                            <DropShadowEffect BlurRadius="7" Color="#FF913B9E"/>
+                        </Button.Effect>
+                        <Button.Background>
+                            <ImageBrush ImageSource="buttonborder.png"/>
+                        </Button.Background>
+                    </Button>
+                    <Button x:Name="button9_Copy" Content="Отгадать слово целиком" HorizontalAlignment="Left" Margin="433,436,0,0" VerticalAlignment="Top" Width="336" Height="51" Foreground="#FFFFC500" BorderBrush="#02707070" FontSize="25" FontWeight="Bold" Click="button9_Copy_Click" Style="{DynamicResource ButtonBack}" Panel.ZIndex="1">
+                        <Button.Effect>
+                            <DropShadowEffect BlurRadius="7" Color="#FF913B9E"/>
+                        </Button.Effect>
+                        <Button.Background>
+                            <ImageBrush ImageSource="buttonborder.png"/>
+                        </Button.Background>
+                    </Button>
+                    <Grid HorizontalAlignment="Center" Height="133" Margin="187,521,243,0" VerticalAlignment="Top" Width="565">
+                        <TextBlock x:Name="textBlock"  HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Height="84" Width="565" FontSize="32" FontWeight="Bold" Foreground="#93FFC500" TextAlignment="Center" Margin="0,24,0,0">
+                            <TextBlock.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#56761769" Offset="0.017"/>
+                                    <GradientStop Color="#701B0530" Offset="1"/>
+                                </RadialGradientBrush>
+                            </TextBlock.Background><Run/><LineBreak/><Run/></TextBlock>
+                    </Grid>
+                    <Label x:Name="label4" Content="Вы уже ввели:" HorizontalAlignment="Left" Margin="209,398,0,0" VerticalAlignment="Top" Style="{DynamicResource wordLabel}" Height="33" Width="146" FontSize="18">
+                        <Label.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#89740703"/>
+                                <GradientStop Color="#1C1B0530" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Label.Background>
+                    </Label>
+                    <Label x:Name="label6" Content="" HorizontalAlignment="Left" Margin="355,398,0,0" VerticalAlignment="Top" Style="{DynamicResource wordLabel}" FontSize="18" Height="33" Width="414">
+                        <Label.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#1C740703"/>
+                                <GradientStop Color="#1C1B0530" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Label.Background>
+                    </Label>
+                    <Image x:Name="image_angry" HorizontalAlignment="Left" Height="455" Margin="686,225,-192,-7" VerticalAlignment="Top" Width="501" Source="yakubangry.png"/>
+                    <Image x:Name="image_fun" HorizontalAlignment="Left" Height="455" Margin="686,225,-192,-7" VerticalAlignment="Top" Width="501" Source="yakubfun.png"/>
+                    <Image x:Name="image_love" gif:ImageBehavior.AnimatedSource="NRI0.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" HorizontalAlignment="Left" Height="100" Margin="725,199,0,0" VerticalAlignment="Top" Width="100" Source="NRI0.gif"/>
+                    <Image x:Name="image_rain" HorizontalAlignment="Left" Height="625" VerticalAlignment="Top" Width="888" Source="1pX9.gif" gif:ImageBehavior.AnimatedSource="1pX9.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" Margin="57,38,0,0"/>
+                    <Label x:Name="wordAnsw" Content="" HorizontalAlignment="Left" Margin="249,346,0,0" VerticalAlignment="Top" Width="469" Foreground="#FFB00000" FontWeight="Bold" FontSize="28" Background="{x:Null}"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="lose" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Background="White">
+                <Grid>
+                    <Grid.Background>
+                        <ImageBrush ImageSource="losefon.png"/>
+                    </Grid.Background>
+                    <Image x:Name="image_rain_Copy" HorizontalAlignment="Left" Height="720" VerticalAlignment="Top" Width="997" Source="1pX9.gif" gif:ImageBehavior.AnimatedSource="1pX9.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" Margin="-31,56,0,-103"/>
+                    <Image x:Name="image" gif:ImageBehavior.AnimatedSource="bad.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" HorizontalAlignment="Left" Height="226" Margin="326,253,0,0" VerticalAlignment="Top" Width="220" Source="bad.gif" Opacity="0.565"/>
+                    <Button x:Name="button10" Content="Заново" HorizontalAlignment="Left" Margin="356,535,0,0" VerticalAlignment="Top" Width="245" Height="82" Panel.ZIndex="1" Style="{DynamicResource ButtonBack}" Foreground="{DynamicResource Yellow}" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="65" FontWeight="Bold" Effect="{DynamicResource EffectShadow}" Click="button10_Click"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="win&#xD;&#xA;win" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">
+                <Grid>
+
+                    <Grid.Background>
+                        <ImageBrush ImageSource="winfon.png"/>
+                    </Grid.Background>
+                    <Image x:Name="image_love2" gif:ImageBehavior.AnimatedSource="NRI0.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" HorizontalAlignment="Left" Height="100" Margin="725,199,0,0" VerticalAlignment="Top" Width="100" Source="NRI0.gif"/>
+                    <Image x:Name="image3" HorizontalAlignment="Left" Height="100" Margin="50,116,0,0" VerticalAlignment="Top" Width="100" Source="xt.gif"  gif:ImageBehavior.AnimatedSource="xt.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True"/>
+                    <Image x:Name="image3_Copy" HorizontalAlignment="Left" Height="100" Margin="825,116,0,0" VerticalAlignment="Top" Width="100" Source="xt.gif"  gif:ImageBehavior.AnimatedSource="xt.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True"/>
+                    <Image x:Name="image4" gif:ImageBehavior.AnimatedSource="ZAc2.gif" gif:ImageBehavior.RepeatBehavior="Forever"   RenderTransformOrigin="0.5,0.5" gif:ImageBehavior.AutoStart="True" HorizontalAlignment="Left" Height="356" Margin="-97,327,0,-10" VerticalAlignment="Top" Width="421" Source="ZAc2.gif" Opacity="0.64"/>
+                    <Label x:Name="label7" Content="Ваш счет:" HorizontalAlignment="Left" Margin="314,327,0,0" VerticalAlignment="Top" Style="{DynamicResource wordLabel}">
+                        <Label.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#89740703"/>
+                                <GradientStop Color="#1C1B0530" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Label.Background>
+                    </Label>
+                    <Label x:Name="labelWinScore" Content="" HorizontalAlignment="Left" Margin="473,327,0,0" VerticalAlignment="Top" Style="{DynamicResource wordLabel}">
+                        <Label.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#89740703"/>
+                                <GradientStop Color="#1C1B0530" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Label.Background>
+                    </Label>
+                    <Button x:Name="button10_Copy" Content="Заново" HorizontalAlignment="Left" Margin="324,504,0,0" VerticalAlignment="Top" Width="245" Height="82" Panel.ZIndex="1" Style="{DynamicResource ButtonBack}" Foreground="{DynamicResource Yellow}" Background="{x:Null}" BorderBrush="{x:Null}" FontSize="65" FontWeight="Bold" Effect="{DynamicResource EffectShadow}" Click="button10_Click"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>
